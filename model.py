@@ -11,7 +11,6 @@ from sklearn.metrics import f1_score
 import pickle
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.ensemble import RandomForestClassifier
-from xgboost import XGBClassifier
 import numpy as np
 from sklearn.metrics import classification_report
 from sklearn.metrics import accuracy_score
@@ -106,8 +105,6 @@ oversample = SMOTE(random_state=2)
 vect_X_train_smote, vect_y_train_smote = oversample.fit_resample(vect_X_train, y_train.ravel())
 
 
-# # #XGboosting classifier
-# xgb = XGBClassifier()
 
 # Logistic Regression
 LR = LogisticRegression( multi_class = 'multinomial', solver = 'newton-cg', C = 0.1, n_jobs = -1, random_state = 42, class_weight='balanced')
