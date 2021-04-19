@@ -11,16 +11,16 @@ class ReusableForm(Form):
     @app.route("/", methods=['POST','GET'])
     def index():
         form = ReusableForm(request.form)
-        with open('logreg_model.pkl', 'rb') as pickle_file:
+        with open('classifier.pkl', 'rb') as pickle_file:
             model_obj = pickle.load(pickle_file)
         
         with open('cleaned_data.pkl', 'rb') as pickle_file:
             dat_clean_obj = pickle.load(pickle_file)
         
-        with open('tfidf_model.pkl', 'rb') as pickle_file:
+        with open('vect.pkl', 'rb') as pickle_file:
             tf_idf_obj = pickle.load(pickle_file)
         
-        with open('user_final_rating.pkl', 'rb') as pickle_file:
+        with open('user_final.pkl', 'rb') as pickle_file:
             user_final_rating = pickle.load(pickle_file)
         
         # dat_clean_obj = pickle.load('cleaned_data.pkl')
@@ -37,6 +37,8 @@ class ReusableForm(Form):
             clean_dat = pd.merge(top_20_recommendation, dat_clean_obj,left_on='product_id',right_on='product_id', how = 'left')
             clean_dat['predicted_sentiment'] = model_obj.predict(tf_idf_obj.transform(clean_dat['reviews']).toarray())
             # create top 5 strongly positive recommnedation for the user strongly positive sentiment for t
+            print(clean_dat['predicted_sentiment'].value_counts())
+            print(top_20_recommendation)
             top_5_rec = clean_dat[clean_dat.loc[:,'predicted_sentiment']=='Positive'].groupby('product_id')['predicted_sentiment'].\
                 value_counts().sort_values(ascending=False)[:5].index
             
