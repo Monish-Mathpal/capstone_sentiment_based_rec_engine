@@ -37,14 +37,16 @@ class ReusableForm(Form):
             clean_dat = pd.merge(top_20_recommendation, dat_clean_obj,left_on='product_id',right_on='product_id', how = 'left')
             clean_dat['predicted_sentiment'] = model_obj.predict(tf_idf_obj.transform(clean_dat['reviews']).toarray())
             # create top 5 strongly positive recommnedation for the user strongly positive sentiment for t
-            top_5_rec = clean_dat[clean_dat.loc[:,'predicted_sentiment']=='Positive'].groupby('product_id')['predicted_sentiment'].\
-                value_counts().sort_values(ascending=False)[:5].index
+            positive_sent_prod = clean_dat.loc[clean_dat['predicted_sentiment']=='Positive', :].copy()
+            positive_sent_prod_per = positive_sent_prod.groupby('product_id')['predicted_sentiment'].count().reset_index()
+            positive_sent_prod_per['positive_percentage'] = 100 * (positive_sent_prod_per['predicted_sentiment']  / positive_sent_prod_per['predicted_sentiment'].sum())
+
+            # print(positive_sent_prod_per['positive_percentage'])
+            top_5_rec = positive_sent_prod_per.sort_values(ascending=False, by='positive_percentage')[:5].copy()
+            # print(top_5_rec)
+            # print(top_5_rec['product_id'].to_list())
             
-            prod_ind = []
-            for ind in top_5_rec:
-                prod_ind.append(ind[0])
-            
-            return jsonify(list(dat_clean_obj.loc[dat_clean_obj['product_id'].isin(prod_ind), :]['name'].unique()))
+            return jsonify(list(dat_clean_obj.loc[dat_clean_obj['product_id'].isin(top_5_rec['product_id'].to_list()), :]['name'].unique()))
         else:
             return  render_template('home.html', form=form)
 
